@@ -833,12 +833,22 @@ void pop()
  * Enable the clock run by setting the MCR run latch bit [15]
  * to 1.
  */
+void enable_clock()
+{
+  // set MCR run latch bit [15] to 1 to enable clock run
+  reg[MCR] |= 0x8000;
+}
 
 /** @brief disable clock run bit
  *
  * Disable the machine clock by setting the MCR run latch bit
  * [15] to 0.
  */
+void disable_clock()
+{
+  // set MCR run latch bit [15] to 0 to disable clock run
+  reg[MCR] &= 0x7FFF;
+}
 
 /** @brief test is clock running
  *
@@ -849,6 +859,19 @@ void pop()
  * @returns bool True if the clock is currently enabled and thus the
  *   system is currently running, false if not.
  */
+bool is_running()
+{
+  // test MCR run latch bit [15], if it is 1 the clock is enabled and machine
+  // is running, if it is 0 the clock is disabled and machine is not running
+  if ((reg[MCR] >> 15) & 0x1)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
 
 /** @brief exception
  *
