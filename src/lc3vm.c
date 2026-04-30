@@ -75,7 +75,12 @@ uint16_t mem_read(uint16_t address)
  *   character, or some other type of data.
  */
 void mem_write(uint16_t address, uint16_t val)
-{ mem[address] = val; }
+{ 
+  if (address == DDR_ADDR){
+    // clear DSR[15]
+    iomap[DSR] = 0x0000;
+  }
+  mem[address] = val; }
 
 /** @brief sign extend bits
  *
