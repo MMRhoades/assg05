@@ -48,7 +48,16 @@ uint16_t PC_START = 0x3000;
  *   simply reads and returns the 16 bits stored at the indicated address.
  */
 uint16_t mem_read(uint16_t address)
-{ return mem[address]; }
+{
+  // if address is KBDR_ADDR
+  if (address == KBDR_ADDR)
+  {
+    // clear KBSR[15]
+    iomap[KBSR] = 0x0000;
+  }
+
+  return mem[address];
+}
 
 /** @brief memory write, transfer to memory
  *
