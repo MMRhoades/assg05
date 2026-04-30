@@ -80,7 +80,7 @@ unit-tests : $(TEST_TARGET)
 
 ## system-tests : Run the system tests on the full simulation
 ##
-system-tests: $(SIM_TARAGET)
+system-tests: $(SIM_TARGET)
 	./scripts/run-system-tests
 
 ## format       : Run the code formatter/beautifier by hand if needed
