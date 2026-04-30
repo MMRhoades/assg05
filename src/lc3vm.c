@@ -476,13 +476,16 @@ void rti(uint16_t i)
   // if we are in user mode you can invoke rti
   if (is_user_mode())
   {
-    // Initiate a privilege mode exception
+    // initiate a privilege mode exception (except vector 0x00, not 0x01)
+    except(0x00);
   }
-
-  reg[PSR] = mem_read(reg[R6]); // R6 is the SSP, the PSR is restored
-  pop();
-  reg[RPC] = mem_read(reg[R6]); // R6 is the SSP, PC is restored
-  pop();
+  else
+  {
+    reg[PSR] = mem_read(reg[R6]); // R6 is the SSP, the PSR is restored
+    pop();
+    reg[RPC] = mem_read(reg[R6]); // R6 is the SSP, PC is restored
+    pop();
+  }
 
   // we did a mode switch back to user mode
   if (is_user_mode())
