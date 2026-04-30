@@ -75,12 +75,16 @@ uint16_t mem_read(uint16_t address)
  *   character, or some other type of data.
  */
 void mem_write(uint16_t address, uint16_t val)
-{ 
-  if (address == DDR_ADDR){
+{
+  // if address is DDR_ADDR
+  if (address == DDR_ADDR)
+  {
     // clear DSR[15]
     iomap[DSR] = 0x0000;
   }
-  mem[address] = val; }
+
+  mem[address] = val;
+}
 
 /** @brief sign extend bits
  *
@@ -940,3 +944,23 @@ bool is_running()
  *   the exception vector number we use to index into the exception service
  *   vector table.
  */
+void except(uint16_t i)
+{
+  uint16_t TEMP = reg[PSR];
+
+  // reuse is_user_mode and supervisor_mode() to test and switch from user to supervisor mode
+  if (is_user_mode())
+  {
+    reg[USP] = reg[R6];
+    reg[R6] = reg[SSP];
+    supervisor_mode();
+  }
+
+  // Push the current return state onto the current stack (supervisor stack).
+  // The return PC and original PSR are needed when `rti()` later restores them.
+  push(reg[RPC]);
+  push(TEMP);
+
+  // Load the trap service routine entry point from the trap vector table with offset
+  reg[RPC] = mem_read(TRP(i) + 0x0100);
+}
