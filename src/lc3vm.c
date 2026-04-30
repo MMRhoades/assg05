@@ -453,7 +453,26 @@ void jsr(uint16_t i)
  * @param i The instruction.  The bits of the instruction we are
  *   executing.
  */
-void rti(uint16_t i) {}
+void rti(uint16_t i)
+{
+  // if we are in user mode you can invoke rti
+  if (is_user_mode())
+  {
+    // Initiate a privilege mode exception
+  }
+
+  reg[PSR] = mem_read(reg[R6]); // R6 is the SSP, the PSR is restored
+  pop();
+  reg[RPC] = mem_read(reg[R6]); // R6 is the SSP, PC is restored
+  pop();
+
+  // we did a mode switch back to user mode
+  if (is_user_mode())
+  {
+    reg[SSP] = reg[R6];
+    reg[R6] = reg[USP];
+  }
+}
 
 /** @brief reserved
  *
