@@ -49,6 +49,13 @@ uint16_t PC_START = 0x3000;
  */
 uint16_t mem_read(uint16_t address)
 {
+  // Check for access control violation in user mode
+  if (is_user_mode() && (address < 0x3000 || address > 0xFDFF))
+  {
+    except(0x02);
+    return 0x0;
+  }
+
   // if address is KBDR_ADDR
   if (address == KBDR_ADDR)
   {
@@ -76,6 +83,13 @@ uint16_t mem_read(uint16_t address)
  */
 void mem_write(uint16_t address, uint16_t val)
 {
+  // Check for access control violation in user mode
+  if (is_user_mode() && (address < 0x3000 || address > 0xFDFF))
+  {
+    except(0x02);
+    return;
+  }
+
   // if address is DDR_ADDR
   if (address == DDR_ADDR)
   {
@@ -478,14 +492,19 @@ void rti(uint16_t i)
   {
     // initiate a privilege mode exception (except vector 0x00, not 0x01)
     except(0x00);
+    return;
   }
-  else
-  {
-    reg[PSR] = mem_read(reg[R6]); // R6 is the SSP, the PSR is restored
-    pop();
-    reg[RPC] = mem_read(reg[R6]); // R6 is the SSP, PC is restored
-    pop();
-  }
+
+  // R6 is the SSP, the PSR is restored
+  uint16_t psr = mem_read(reg[R6]);
+  pop();
+
+  // R6 is the SSP, PC is restored
+  uint16_t rpc = mem_read(reg[R6]);
+  pop();
+
+  reg[PSR] = psr;
+  reg[RPC] = rpc;
 
   // we did a mode switch back to user mode
   if (is_user_mode())
